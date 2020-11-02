@@ -141,7 +141,7 @@ cython_debug/
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # IDE folder
-.idea/
+../.idea/
 
 # CMake
 cmake-build-*/

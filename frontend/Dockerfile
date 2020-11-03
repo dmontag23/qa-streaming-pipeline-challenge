@@ -8,10 +8,3 @@ RUN npm install
 COPY . /usr/src/app
 RUN npm run build
 CMD ["npm", "start"]
-
-#FROM nginx:alpine
-#COPY --from=build /usr/src/app/build /usr/share/nginx/html
-#COPY nginx.conf /etc/nginx/nginx.conf
-#
-#EXPOSE 80
-#CMD ["nginx", "-g", "daemon off;"]

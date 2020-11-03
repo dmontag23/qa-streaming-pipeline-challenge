@@ -3,13 +3,23 @@ import sqlite3 as sqlite
 import sys
 import os
 
-app = Flask(__name__)
+from ingestion_script import run_ingestion_script
 
+app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def home():
     return """<h1>Streaming API</h1>
     """
+
+@app.route('/api/v1/run_script', methods=['GET'])
+def run_script():
+    result = run_ingestion_script()
+    results = [{
+    "classification": result,
+    "regression": 1,
+    }]
+    return jsonify(results)
 
 
 def dict_factory(cursor, row):

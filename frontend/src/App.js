@@ -4,19 +4,17 @@ import axios from "axios";
 function runScript() {
 
   console.log("The script was run!")
-  axios.get("/api/v1/data?page=0")
+  axios.get("/api/v1/run_script")
     .then(function (response) {
     // handle success
     console.log(response);
-    console.log(response.data)
+    console.log(response.data[0].classification)
+    console.log(response.data[0].regression)
     })
     .catch(function (error) {
       // handle error
     console.log(error);
     })
-    .then(function () {
-    // always executed
-    });
 }
 
 function App() {

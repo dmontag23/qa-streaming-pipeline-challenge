@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import sqlite3 as sqlite
 import sys
 import os
+
 app = Flask(__name__)
 
 
@@ -9,6 +10,7 @@ app = Flask(__name__)
 def home():
     return """<h1>Streaming API</h1>
     """
+
 
 def dict_factory(cursor, row):
     d = {}
@@ -30,13 +32,14 @@ def api_filter():
     results = cur.execute(query).fetchall()
     return jsonify(results)
 
+
 def build_query(page):
     n_per_page = 10
     offset = page * n_per_page
     # Possibly vulnerable to SQL injection.
     query = "SELECT * FROM data LIMIT 10 OFFSET " + str(offset)
- 
-    return query 
+
+    return query
 
 
 if __name__ == '__main__':
@@ -44,4 +47,3 @@ if __name__ == '__main__':
         app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT'))
     else:
         app.run(debug=True, host='0.0.0.0')
-

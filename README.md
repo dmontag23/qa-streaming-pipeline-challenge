@@ -1,47 +1,29 @@
-# QA Streaming ML Pipeline Challenge
+# QA Streaming ML Pipeline Challenge - Solution
 
-The challenge consists of three fundamental steps:
+To use this solution, use the docker-compose.yml file to start the frontend and backend servers (the servers will be hosted locally). Once the servers are running, go to http://localhost:3000/ to view the app.
 
-1. Start the "api" service through the provided docker-compose.yml file
-2. Develop a script to ingest data through the api's main endpoint (if hosted locally "localhost:5000/api/v1/data")
+To run the models, click on the "update" button. This button simulates new data added to the models after it has been collected (an equivalent way to do this would to be to call the api after a designated time - say, 1 second. The update button simulates this behavior). Note that you may have to wait for a few seconds before the UI updates.
 
-**NOTE**: The data from the API endpoint is paginated. Thus, you need to give to the API endpoint also a
- GET parameter "page" (starting from 0 until it will throw an error).
+I treated the assignment as if /api/v1/data was an external API that I needed to call with my application. In order to do so, I created my own route /api/v1/run_script to run the ingestion script, which runs on the backend server. The backend server then queries /api/v1/data to get the necessary data.
 
-3. Now that you are able to ingest data from the API, implement an online regression model (you can use 
-any library) which gets incrementally fitted on the data (See "ML Model" section).
+The ingestion script is defined in ingestion_script.py and it gets the next 100 pages of results every time a call is made to /api/v1/run_script. This data is then fed into the machine learning models and appropriate model indicators are returned via JSON.
 
-**IMPORTANT** The ingestion script should ingest data in batches and feed it to the model in batches.
-Do not just pre-load all the data in advance. This is the "streaming" part of the challenge.
+## ML Models
+For the classification model, I chose to construct a neural network that functions as a binary classifier. The network takes the two parameters competence and network ability and then predicts whether or not that user is promoted. The output node is a value in the range [0,1], which can be interpreted as the probability that a user is promoted. The tanh function is used as the activation function since it tends to work well for binary classifiers. Stochastic gradient descent is used to train the network.
 
-## ML Model
+In order to determine how well the model is functioning, the data is randomly split into a training set (80\% of the data) and a validation set (20\% of the data). The model is trained on the training set. The trained model is then run on the validation set to determine how well it predicts the outcomes from the validation set. This information is displayed to the user each time the model is updated with new data.
 
-Our API returns 4 columns:
-* id: An incremental identifier for each row.
-* network_ability: Represents the networking ability of an employee.
-* competence: Represents actual work competence of an employee.
-* promoted: A Boolean variable (of 0s and 1s) that indicates whether the employee got a promotion or not.
+For the regression model, I started by running different simulations with a linear regression model to determine the strength of the relationship between competence and network ability and promoted and network ability (note that, by the nature of how id's are created, there should be no correlation between id's and network ability). When running the models, the correlation coefficient r^2 between competence and network ability was never above 10^-3, which indicates almost no correlation between the two variables. Therefore, a linear regression model was chosen where promoted is the independent variable and network ability is the dependent variable. The correlation coefficient is shown in the graph, which indicates how strongly the two variables are correlated.
 
-We are interested in two kind of models:
+## Improvements
+Note that there are certain features of this solution that could be improved. 
 
-Firstly, develop a simple classification algorithm which attempts to predict the variable "promoted" through the other variables. <br>
-The focus of this model is pure prediction capability.
+### UI Improvements
+Ideally, it would be good to disable the "Update" button when the app is refreshing, or perhaps remove the button altogether and replace it with a call to the api that happens every second and automatically refreshes the model. Also, the design of the UI could be improved to be more aesthetic.
 
-Secondly, develop one or more regression models in which the endogenous variable is "network_ability". <br>
-The goal of this second kind of model is to understand the relationship between the other variables and "network_ability". <br>
-Hint: Try to reason qualitatively about the dependencies of the variables before starting to crunch numbers, try to think like a scientist.
+### ML Model Improvements
+For the classification model, certain hyperparameters may be able to be adjusted in order to be able to increase the accuracy of the model. Also, experimenting with the method of training the model (how many batches and epochs to use, etc) could help improve the results.
 
-**Bonus**: Please save the model, the current page, the coefficients and any relevant statistical measure to the SQLite database (on a different table than "data") while you are updating it.
+Many more things could be done to improve the regression model. A linear regression model is often over-simplistic and assumes a linear relationship between the independent and dependent variables, which is not strongly present in the data. Also, the preliminary results about the correlation between competence and network ability, while sensible from a qualitative point of view, may still be important to model, perhaps using a technique such as Lasso Regression.
 
-## User Interaction
-
-You can be creative about how an user should interact with your streaming ML pipeline.
-
-How can the user visualize the convergence/updating of the model? How are you going to present the results?
-
-
-### Submission 
-
-Please submit a Git repository (hosted on any git provider) to giulio@quickalgorithm.com containing all the necessary files and a text/markdown file explaining how you solved the various steps.
- 
-
+For all the models, the way in which the data is ingested could also be improved. For efficiency reasons, the model only ingests a small amount of data at a time. Running these models on the full dataset should greatly increase their accuracy.

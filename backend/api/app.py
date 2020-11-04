@@ -14,11 +14,7 @@ def home():
 
 @app.route('/api/v1/run_script', methods=['GET'])
 def run_script():
-    result = run_ingestion_script()
-    results = [{
-    "classification": result,
-    "regression": 1,
-    }]
+    results = run_ingestion_script()
     return jsonify(results)
 
 
